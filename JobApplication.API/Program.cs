@@ -32,6 +32,7 @@ namespace JobApplication.API
 
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<IJobService, JobService>();
+            builder.Services.AddScoped<IRecruiterRepository, RecruiterRepository>();
 
             builder.Services
             .AddIdentity<ApplicationUser, IdentityRole>()
