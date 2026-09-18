@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace JobApplication.Application.DTOs.JobDtos
+namespace JobApplication.Application.DTOs.Job
 {
-    public class CreateJobDto
+    public class JobRequestDTO
     {
         public string Title { get; set; }
         public string Description  { get; set; }

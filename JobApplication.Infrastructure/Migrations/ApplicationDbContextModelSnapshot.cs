@@ -31,14 +31,20 @@ namespace JobApplication.Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CvUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Candidates");
                 });
@@ -51,6 +57,9 @@ namespace JobApplication.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("ClosedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -58,11 +67,16 @@ namespace JobApplication.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<int>("RecruiterId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("RecruiterId");
 
                     b.ToTable("Jobs");
                 });
@@ -78,7 +92,7 @@ namespace JobApplication.Infrastructure.Migrations
                     b.Property<DateTime>("AppliedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("CancelledAt")
+                    b.Property<DateTime?>("CancelledAt")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("CandidateId")
@@ -100,6 +114,33 @@ namespace JobApplication.Infrastructure.Migrations
                     b.HasIndex("JobId");
 
                     b.ToTable("JobCandidateApplications");
+                });
+
+            modelBuilder.Entity("JobApplication.Domain.Entities.Recruiter", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CompanyName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("Recruiters");
                 });
 
             modelBuilder.Entity("JobApplication.Infrastructure.Identity.ApplicationUser", b =>
@@ -300,18 +341,29 @@ namespace JobApplication.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("JobApplication.Domain.Entities.Job", b =>
+                {
+                    b.HasOne("JobApplication.Domain.Entities.Recruiter", "Recruiter")
+                        .WithMany()
+                        .HasForeignKey("RecruiterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Recruiter");
+                });
+
             modelBuilder.Entity("JobApplication.Domain.Entities.JobCandidateApplication", b =>
                 {
                     b.HasOne("JobApplication.Domain.Entities.Candidate", "Candidate")
                         .WithMany()
                         .HasForeignKey("CandidateId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("JobApplication.Domain.Entities.Job", "Job")
                         .WithMany()
                         .HasForeignKey("JobId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Candidate");

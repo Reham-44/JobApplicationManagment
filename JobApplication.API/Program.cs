@@ -30,8 +30,9 @@ namespace JobApplication.API
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
 
+            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<IJobService, JobService>();
-            builder.Services.AddScoped<IJobRepository, JobRepository>();
+
             builder.Services
             .AddIdentity<ApplicationUser, IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()

@@ -11,9 +11,40 @@ namespace JobApplication.Infrastructure.Persistence
         public DbSet<Job> Jobs { get; set; }
         public DbSet<Candidate> Candidates { get; set; }
         public DbSet<JobCandidateApplication> JobCandidateApplications { get; set; }
+        public DbSet<Recruiter> Recruiters { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
         {
+        }
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<Candidate>()
+                .HasIndex(c => c.UserId)
+                .IsUnique();
+
+            builder.Entity<Recruiter>()
+                .HasIndex(r => r.UserId)
+                .IsUnique();
+
+            builder.Entity<Job>()
+                .HasOne(j => j.Recruiter)
+                .WithMany()
+                .HasForeignKey(j => j.RecruiterId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<JobCandidateApplication>()
+                .HasOne(a => a.Candidate)
+                .WithMany()
+                .HasForeignKey(a => a.CandidateId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<JobCandidateApplication>()
+                .HasOne(a => a.Job)
+                .WithMany()
+                .HasForeignKey(a => a.JobId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

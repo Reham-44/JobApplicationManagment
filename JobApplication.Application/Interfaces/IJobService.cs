@@ -1,14 +1,13 @@
-﻿using JobApplication.Application.DTOs.JobDtos;
-using JobApplication.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using JobApplication.Application.DTOs.Job;
 
 namespace JobApplication.Application.Interfaces
 {
     public interface IJobService
     {
-        public Task<Job> CreateAsync(CreateJobDto createJobDto);
-
+        public Task<JobResponseDTO> CreateAsync(JobRequestDTO jobRequestDTO,string userId);
+        public Task<JobResponseDTO> Update(int id, JobRequestDTO jobDto);
+        public Task Delete(int id);
+        public Task<IEnumerable<JobResponseDTO>> GetAll();
+        public Task<JobResponseDTO> GetById(int id);
     }
 }

@@ -7,7 +7,13 @@ namespace JobApplication.Application.Interfaces
 {
     public interface IAuthService
     {
-        Task<AuthResponseDTO> RegisterAsync(RegisterDTO dto);
-        Task<AuthResponseDTO> LoginAsync(LoginDTO dto);
+        Task<AuthResponseDTO> RegisterCandidateAsync(
+            CandidateRegisterDTO dto);
+
+        Task<AuthResponseDTO> RegisterRecruiterAsync(
+            RecruiterRegisterDTO dto);
+
+        Task<AuthResponseDTO> LoginAsync(
+            LoginDTO dto);
     }
 }

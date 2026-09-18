@@ -1,7 +1,5 @@
 ﻿using JobApplication.Application.DTOs.Auth;
 using JobApplication.Application.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobApplication.API.Controllers
@@ -17,39 +15,45 @@ namespace JobApplication.API.Controllers
             _authService = authService;
         }
 
-        [HttpPost("Register")]
-        public async Task<IActionResult> Register(RegisterDTO dto)
+        [HttpPost("register/candidate")]
+        public async Task<IActionResult> RegisterCandidate(
+            CandidateRegisterDTO dto)
         {
-            try
-            {
-                var result = await _authService.RegisterAsync(dto);
+            var result = await _authService.RegisterCandidateAsync(dto);
 
-                return Ok(result);
-            }
-            catch (Exception ex)
+            if (!result.Success)
             {
-                return BadRequest(new
-                {
-                    message = ex.Message
-                });
+                return BadRequest(result);
             }
+
+            return Ok(result);
         }
 
-        [HttpPost("Login")]
+        [HttpPost("register/recruiter")]
+        public async Task<IActionResult> RegisterRecruiter(
+            RecruiterRegisterDTO dto)
+        {
+            var result = await _authService.RegisterRecruiterAsync(dto);
+
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
+        [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDTO dto)
         {
-            try
+            var result = await _authService.LoginAsync(dto);
+
+            if (!result.Success)
             {
-                var result = await _authService.LoginAsync(dto);
-                return Ok(result);
+                return Unauthorized(result);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(new
-                {
-                    message = ex.Message
-                });
-            }
+
+            return Ok(result);
         }
     }
 }
