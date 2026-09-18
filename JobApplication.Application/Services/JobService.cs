@@ -1,4 +1,4 @@
-﻿using JobApplication.Application.DTOs;
+﻿using JobApplication.Application.DTOs.Job;
 using JobApplication.Application.Interfaces;
 using JobApplication.Domain.Entities;
 using System;
@@ -7,27 +7,110 @@ using System.Text;
 
 namespace JobApplication.Application.Services
 {
-    public class JobService
+    public class JobService : IJobService
     {
-        private readonly IJobRepository _jobRepository;
+        private readonly IGenericRepository<Job> _jobRepository;
 
-        public JobService(IJobRepository jobRepository)
+        public JobService(IGenericRepository<Job> jobRepository)
         {
             _jobRepository = jobRepository;
         }
 
-        public async Task<int> CreateAsync(CreateJobDto createJobDto)
+        public async Task<JobResponseDTO> CreateAsync(JobRequestDTO jobRequestDTO)
         {   
             var job = new Job()
             {
-                Title = createJobDto.Title,
-                Description = createJobDto.Description,
+                Title = jobRequestDTO.Title,
+                Description = jobRequestDTO.Description,
                 IsActive = true
             };
-            await _jobRepository.InsertAsync(job);
+            await _jobRepository.AddAsync(job);
             await _jobRepository.SaveChangesAsync();
 
-            return job.Id; 
+            return new JobResponseDTO
+            {
+                Title = job.Title,
+                Description = job.Description,
+                IsActive = job.IsActive
+            };
+        }
+
+
+           public async Task<IEnumerable<JobResponseDTO>> GetAll()
+        {
+          var jobs= await _jobRepository.GetAllAsync();
+            if (!jobs.Any())
+            {
+                throw new Exception($"No jobs found.");
+            }
+            return jobs.Select(job => new JobResponseDTO
+            {
+                Title = job.Title,
+                Description = job.Description,
+                IsActive=job.IsActive
+            });
+        }
+
+        public async Task<JobResponseDTO> GetById(int id)
+        {
+           var job= await _jobRepository.GetByIdAsync(id);
+            if (job == null)
+            {
+                throw new Exception($"Job with id {id} not found.");
+            }
+            return new JobResponseDTO()
+            {
+                Description = job.Description,
+                Title = job.Title,
+                IsActive = job.IsActive
+            };
+        }
+
+
+        public async Task<JobResponseDTO> Update(int id, JobRequestDTO jobDto)
+        {
+            var job = await _jobRepository.GetByIdAsync(id);
+
+            if (job == null)
+            {
+                throw new Exception($"Job with id {id} not found.");
+            }
+
+            job.Title = jobDto.Title;
+            job.Description = jobDto.Description;
+
+            _jobRepository.Update(job);
+            await _jobRepository.SaveChangesAsync();
+
+            return new JobResponseDTO
+            {
+                Title = job.Title,
+                Description = job.Description,
+                IsActive = job.IsActive
+            };
+        }
+
+        public async Task Delete(int id)
+        {
+            var job = await _jobRepository.GetByIdAsync(id);
+
+            if (job == null)
+            {
+                throw new Exception($"Job with id {id} not found.");
+            }
+
+            _jobRepository.Delete(job);
+            await _jobRepository.SaveChangesAsync();
+        }
+
+        public Task<JobResponseDTO> CreateAsync(JobRequestDTO jobRequestDTO, string userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task CloseAsync(int id, string userId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -1,29 +1,36 @@
-﻿using JobApplication.Application.DTOs;
+﻿using JobApplication.Application.DTOs.Job;
+using JobApplication.Application.Interfaces;
 using JobApplication.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace JobApplication.API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class JobsController : ControllerBase
     {
-        private readonly JobService _JobService;
+        private readonly IJobService _JobService;
 
-        public JobsController(JobService jobService)
+        public JobsController(IJobService jobService)
         {
             _JobService = jobService;
         }
 
+        [Authorize(Roles = "Recruiter")]
         [HttpPost]
-        public async Task<IActionResult> Create(CreateJobDto createJobDto)
+        public async Task<IActionResult> Create(JobRequestDTO dto)
         {
-            var id = await _JobService.CreateAsync(createJobDto);
-            return Ok(new
-            {
-                id = id 
-            }); 
+            var userId = User.FindFirstValue(
+                ClaimTypes.NameIdentifier);
+
+            var result =
+                await _JobService.CreateAsync(dto, userId!);
+
+            return Ok(result);
         }
     }
 }
