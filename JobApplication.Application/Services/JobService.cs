@@ -1,4 +1,4 @@
-﻿using JobApplication.Application.DTOs;
+﻿using JobApplication.Application.DTOs.JobDtos;
 using JobApplication.Application.Interfaces;
 using JobApplication.Domain.Entities;
 using System;
@@ -7,7 +7,7 @@ using System.Text;
 
 namespace JobApplication.Application.Services
 {
-    public class JobService
+    public class JobService : IJobService
     {
         private readonly IJobRepository _jobRepository;
 
@@ -16,7 +16,7 @@ namespace JobApplication.Application.Services
             _jobRepository = jobRepository;
         }
 
-        public async Task<int> CreateAsync(CreateJobDto createJobDto)
+        public async Task<Job> CreateAsync(CreateJobDto createJobDto)
         {   
             var job = new Job()
             {
@@ -27,7 +27,7 @@ namespace JobApplication.Application.Services
             await _jobRepository.InsertAsync(job);
             await _jobRepository.SaveChangesAsync();
 
-            return job.Id; 
+            return job; 
         }
     }
 }

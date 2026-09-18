@@ -18,5 +18,6 @@ namespace JobApplication.Domain.Entities
         public JobApplicationStatus JobApplicationStatus { get; set; }
         public DateTime AppliedAt { get; set; }
         public DateTime StatusUpdatedAt { get; set; }
+        public DateTime CancelledAt { get; set; }
     }
 }
