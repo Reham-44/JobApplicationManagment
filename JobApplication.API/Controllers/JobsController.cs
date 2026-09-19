@@ -8,7 +8,6 @@ using System.Security.Claims;
 
 namespace JobApplication.API.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class JobsController : ControllerBase
@@ -27,10 +26,46 @@ namespace JobApplication.API.Controllers
             var userId = User.FindFirstValue(
                 ClaimTypes.NameIdentifier);
 
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
             var result =
                 await _JobService.CreateAsync(dto, userId!);
 
             return Ok(result);
         }
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _JobService.GetAll();
+            return Ok(result);
+        }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var result = await _JobService.GetById(id);
+             return Ok(result);
+        }
+
+        [Authorize(Roles = "Recruiter")]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(
+             int id,
+             JobRequestDTO dto)
+        {
+            var userId = User.FindFirstValue(
+                ClaimTypes.NameIdentifier);
+
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            var result = await _JobService.Update(id, dto, userId);
+
+            return Ok(result);
+        }
+
     }
 }

@@ -44,6 +44,7 @@ namespace JobApplication.Application.Services
 
             return new JobResponseDTO
             {
+                Id = job.Id,
                 Title = job.Title,
                 Description = job.Description,
                 IsActive = job.IsActive,
@@ -53,12 +54,10 @@ namespace JobApplication.Application.Services
         public async Task<IEnumerable<JobResponseDTO>> GetAll()
         {
           var jobs= await _jobRepository.GetAllAsync();
-            if (!jobs.Any())
-            {
-                throw new Exception($"No jobs found.");
-            }
+    
             return jobs.Select(job => new JobResponseDTO
             {
+                Id = job.Id,
                 Title = job.Title,
                 Description = job.Description,
                 IsActive=job.IsActive
@@ -70,10 +69,11 @@ namespace JobApplication.Application.Services
            var job= await _jobRepository.GetByIdAsync(id);
             if (job == null)
             {
-                throw new Exception($"Job with id {id} not found.");
+                throw new KeyNotFoundException("Job not found.");
             }
             return new JobResponseDTO()
             {
+                Id = job.Id,
                 Description = job.Description,
                 Title = job.Title,
                 IsActive = job.IsActive
@@ -81,13 +81,35 @@ namespace JobApplication.Application.Services
         }
 
 
-        public async Task<JobResponseDTO> Update(int id, JobRequestDTO jobDto)
+        public async Task<JobResponseDTO> Update(int id, JobRequestDTO jobDto, string userId)
         {
             var job = await _jobRepository.GetByIdAsync(id);
 
             if (job == null)
             {
-                throw new Exception($"Job with id {id} not found.");
+                throw new KeyNotFoundException(
+                    $"Job with id {id} not found.");
+            }
+
+            var recruiter =
+                await _recruiterRepository.GetByUserIdAsync(userId);
+
+            if (recruiter == null)
+            {
+                throw new KeyNotFoundException(
+                    "Recruiter profile not found.");
+            }
+
+            if (job.RecruiterId != recruiter.Id)
+            {
+                throw new UnauthorizedAccessException(
+                    "You are not the owner of this job.");
+            }
+
+            if (!job.IsActive)
+            {
+                throw new InvalidOperationException(
+                    "Closed jobs cannot be updated.");
             }
 
             job.Title = jobDto.Title;
@@ -98,9 +120,10 @@ namespace JobApplication.Application.Services
 
             return new JobResponseDTO
             {
+                Id = job.Id,
                 Title = job.Title,
                 Description = job.Description,
-                IsActive = job.IsActive
+                IsActive = job.IsActive,
             };
         }
 
@@ -110,16 +133,12 @@ namespace JobApplication.Application.Services
 
             if (job == null)
             {
-                throw new Exception($"Job with id {id} not found.");
+                throw new KeyNotFoundException("Job not found.");
             }
 
             _jobRepository.Delete(job);
             await _jobRepository.SaveChangesAsync();
         }
 
-        public Task CloseAsync(int id, string userId)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
