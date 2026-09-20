@@ -8,7 +8,7 @@ namespace JobApplication.Domain.Enums
     {
         Applied , 
         UnderReview , 
-        InterView , 
+        Interview , 
         Accepted , 
         Rejected,
         Cancelled

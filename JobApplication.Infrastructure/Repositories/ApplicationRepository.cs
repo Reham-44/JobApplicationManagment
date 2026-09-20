@@ -29,5 +29,29 @@ namespace JobApplication.Infrastructure.Repositories
                     a.CandidateId == candidateId &&
                     a.JobId == jobId);
         }
+        public async Task<JobCandidateApplication?> GetByIdWithJobAsync(int id)
+        {
+            return await _context.JobCandidateApplications
+                .Include(a => a.Job)
+                .FirstOrDefaultAsync(a => a.Id == id);
+        }
+        public async Task<IEnumerable<JobCandidateApplication>> GetByCandidateIdAsync(int candidateId)
+        {
+            return await _context.JobCandidateApplications
+                .Include(a => a.Job)
+                .Where(a => a.CandidateId == candidateId)
+                .OrderByDescending(a => a.AppliedAt)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<JobCandidateApplication>> GetByRecruiterIdAsync(int recruiterId)
+        {
+            return await _context.JobCandidateApplications
+                .Include(a => a.Job)
+                .Include(a => a.Candidate)
+                .Where(a => a.Job.RecruiterId == recruiterId)
+                .OrderByDescending(a => a.AppliedAt)
+                .ToListAsync();
+        }
     }
 }

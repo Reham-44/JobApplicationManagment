@@ -11,5 +11,9 @@ namespace JobApplication.Application.Interfaces.RepositoryInterfaces
         Task<JobCandidateApplication?> GetByCandidateAndJobAsync(
             int candidateId,
             int jobId);
+        Task<JobCandidateApplication?> GetByIdWithJobAsync(int id);
+        Task<IEnumerable<JobCandidateApplication>> GetByCandidateIdAsync(
+    int candidateId);
+        Task<IEnumerable<JobCandidateApplication>> GetByRecruiterIdAsync(int recruiterId);
     }
 }

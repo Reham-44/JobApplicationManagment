@@ -1,4 +1,5 @@
-﻿using JobApplication.Application.Interfaces.ServiceInterfaces;
+﻿using JobApplication.Application.DTOs.Application;
+using JobApplication.Application.Interfaces.ServiceInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -36,6 +37,67 @@ namespace JobApplication.API.Controllers
                     userId);
 
           return Created("Application submitted successfully",  applicationId);
+        }
+        [Authorize(Roles = "Candidate")]
+        [HttpGet("my")]
+        public async Task<IActionResult> GetMyApplications()
+        {
+            var userId =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            var applications =
+                await _applicationService
+                    .GetMyApplicationsAsync(userId);
+
+            return Ok(applications);
+        }
+        [Authorize(Roles = "Recruiter")]
+        [HttpGet("recruiter")]
+        public async Task<IActionResult> GetMyJobApplications()
+        {
+            var userId =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            var applications =
+                await _applicationService
+                    .GetMyJobApplicationsAsync(userId);
+
+            return Ok(applications);
+        }
+
+        [Authorize(Roles = "Recruiter")]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateStatus(
+            int id,
+            ApplicationStatusDTO dto)
+        {
+            var userId =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            await _applicationService.UpdateStatusAsync(
+                id,
+                dto,
+                userId);
+
+            return Ok(new
+            {
+                message = "Application status updated successfully."
+            });
         }
 
 
