@@ -1,5 +1,6 @@
 ﻿using JobApplication.Application.DTOs.Job;
-using JobApplication.Application.Interfaces;
+using JobApplication.Application.Interfaces.RepositoryInterfaces;
+using JobApplication.Application.Interfaces.ServiceInterfaces;
 using JobApplication.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -48,6 +49,7 @@ namespace JobApplication.Application.Services
                 Title = job.Title,
                 Description = job.Description,
                 IsActive = job.IsActive,
+                ClosedAt = job.ClosedAt
             };
         }
 
@@ -60,7 +62,8 @@ namespace JobApplication.Application.Services
                 Id = job.Id,
                 Title = job.Title,
                 Description = job.Description,
-                IsActive=job.IsActive
+                IsActive=job.IsActive,
+                ClosedAt = job.ClosedAt
             });
         }
 
@@ -76,7 +79,8 @@ namespace JobApplication.Application.Services
                 Id = job.Id,
                 Description = job.Description,
                 Title = job.Title,
-                IsActive = job.IsActive
+                IsActive = job.IsActive,
+                ClosedAt = job.ClosedAt
             };
         }
 
@@ -124,6 +128,7 @@ namespace JobApplication.Application.Services
                 Title = job.Title,
                 Description = job.Description,
                 IsActive = job.IsActive,
+                ClosedAt = job.ClosedAt
             };
         }
 
@@ -137,6 +142,43 @@ namespace JobApplication.Application.Services
             }
 
             _jobRepository.Delete(job);
+            await _jobRepository.SaveChangesAsync();
+        }
+        public async Task CloseAsync(int id, string userId)
+        {
+            var job = await _jobRepository.GetByIdAsync(id);
+
+            if (job == null)
+            {
+                throw new KeyNotFoundException(
+                    $"Job with id {id} not found.");
+            }
+
+            var recruiter =
+                await _recruiterRepository.GetByUserIdAsync(userId);
+
+            if (recruiter == null)
+            {
+                throw new KeyNotFoundException(
+                    "Recruiter profile not found.");
+            }
+
+            if (job.RecruiterId != recruiter.Id)
+            {
+                throw new UnauthorizedAccessException(
+                    "You are not the owner of this job.");
+            }
+
+            if (!job.IsActive)
+            {
+                throw new InvalidOperationException(
+                    "Job is already closed.");
+            }
+
+            job.IsActive = false;
+            job.ClosedAt = DateTime.UtcNow;
+
+            _jobRepository.Update(job);
             await _jobRepository.SaveChangesAsync();
         }
 

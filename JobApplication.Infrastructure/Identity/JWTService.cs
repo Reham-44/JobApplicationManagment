@@ -1,4 +1,4 @@
-﻿using JobApplication.Application.Interfaces;
+﻿using JobApplication.Application.Interfaces.ServiceInterfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;

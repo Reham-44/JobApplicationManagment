@@ -1,5 +1,5 @@
 ﻿using JobApplication.Application.DTOs.Job;
-using JobApplication.Application.Interfaces;
+using JobApplication.Application.Interfaces.ServiceInterfaces;
 using JobApplication.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -65,6 +65,22 @@ namespace JobApplication.API.Controllers
             var result = await _JobService.Update(id, dto, userId);
 
             return Ok(result);
+        }
+        [Authorize(Roles = "Recruiter")]
+        [HttpPut("{id}/close")]
+        public async Task<IActionResult> Close(int id)
+        {
+            var userId = User.FindFirstValue(
+                ClaimTypes.NameIdentifier);
+
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            await _JobService.CloseAsync(id, userId);
+
+            return NoContent();
         }
 
     }

@@ -1,5 +1,5 @@
 ﻿using JobApplication.Application.DTOs.Auth;
-using JobApplication.Application.Interfaces;
+using JobApplication.Application.Interfaces.ServiceInterfaces;
 using JobApplication.Domain.Entities;
 using JobApplication.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;

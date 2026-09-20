@@ -8,18 +8,20 @@ using System.Text;
 
 namespace JobApplication.Infrastructure.Repositories
 {
-
-    public class RecruiterRepository : IRecruiterRepository
+    public class CandidateRepository: ICandidateRepository
     {
+
         private readonly ApplicationDbContext _context;
-        public RecruiterRepository(ApplicationDbContext context)
+
+        public CandidateRepository(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        public async Task<Recruiter?> GetByUserIdAsync(string userId)
+        public async Task<Candidate?> GetByUserIdAsync(string userId)
         {
-            return await _context.Recruiters.FirstOrDefaultAsync(r => r.UserId == userId);
+            return await _context.Candidates
+                .FirstOrDefaultAsync(c => c.UserId == userId);
         }
     }
 }
