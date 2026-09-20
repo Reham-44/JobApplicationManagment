@@ -1,5 +1,5 @@
 ﻿using JobApplication.Application.DTOs.Auth;
-using JobApplication.Application.Interfaces;
+using JobApplication.Application.Interfaces.ServiceInterfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobApplication.API.Controllers

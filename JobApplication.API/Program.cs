@@ -1,5 +1,7 @@
 
-using JobApplication.Application.Interfaces;
+using JobApplication.API.Middleware;
+using JobApplication.Application.Interfaces.RepositoryInterfaces;
+using JobApplication.Application.Interfaces.ServiceInterfaces;
 using JobApplication.Application.Services;
 using JobApplication.Infrastructure.Identity;
 using JobApplication.Infrastructure.Persistence;
@@ -33,6 +35,9 @@ namespace JobApplication.API
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<IJobService, JobService>();
             builder.Services.AddScoped<IRecruiterRepository, RecruiterRepository>();
+            builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
+            builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
+            builder.Services.AddScoped<IApplicationService, ApplicationService>();
 
             builder.Services
             .AddIdentity<ApplicationUser, IdentityRole>()
@@ -76,7 +81,7 @@ namespace JobApplication.API
             builder.Services.AddOpenApi();
 
             var app = builder.Build();
-
+            app.UseMiddleware<GlobalExceptionMiddleware>();
             using (var scope = app.Services.CreateScope())
             {
                 var roleManager = scope.ServiceProvider
