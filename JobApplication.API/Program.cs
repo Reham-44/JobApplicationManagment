@@ -1,5 +1,6 @@
 
 using JobApplication.API.Middleware;
+using JobApplication.Application;
 using JobApplication.Application.Interfaces.RepositoryInterfaces;
 using JobApplication.Application.Interfaces.ServiceInterfaces;
 using JobApplication.Application.Services;
@@ -75,6 +76,10 @@ namespace JobApplication.API
                 Encoding.UTF8.GetBytes(key))
         };
     });
+            builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(
+        typeof(AssemblyReference).Assembly));
+
             builder.Services.AddScoped<IJWTService, JWTService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

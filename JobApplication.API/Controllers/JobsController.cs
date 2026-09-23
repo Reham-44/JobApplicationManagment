@@ -1,7 +1,10 @@
 ﻿using JobApplication.Application.DTOs.Job;
+using JobApplication.Application.Features.Jobs.Commands;
 using JobApplication.Application.Interfaces.ServiceInterfaces;
 using JobApplication.Application.Services;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -13,10 +16,13 @@ namespace JobApplication.API.Controllers
     public class JobsController : ControllerBase
     {
         private readonly IJobService _JobService;
+        private readonly IMediator _mediator;
 
-        public JobsController(IJobService jobService)
+        public JobsController(IJobService jobService, IMediator mediator)
         {
             _JobService = jobService;
+            _mediator = mediator;
+
         }
 
         [Authorize(Roles = "Recruiter")]
@@ -30,8 +36,15 @@ namespace JobApplication.API.Controllers
             {
                 return Unauthorized();
             }
-            var result =
-                await _JobService.CreateAsync(dto, userId!);
+
+            var command = new CreateJobByRecruiterCommand
+            {
+                Title = dto.Title,
+                Description = dto.Description,
+                UserId = userId
+            };
+
+            var result = await _mediator.Send(command);
 
             return Ok(result);
         }
