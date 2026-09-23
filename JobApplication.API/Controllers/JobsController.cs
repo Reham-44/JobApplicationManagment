@@ -1,5 +1,6 @@
 ﻿using JobApplication.Application.DTOs.Job;
 using JobApplication.Application.Features.Jobs.Commands;
+using JobApplication.Application.Features.Jobs.Commands.CloseJob;
 using JobApplication.Application.Features.Jobs.Commands.CreateJobByRecruiter;
 using JobApplication.Application.Features.Jobs.Queries.GetAllJobs;
 using JobApplication.Application.Interfaces.ServiceInterfaces;
@@ -93,7 +94,7 @@ namespace JobApplication.API.Controllers
                 return Unauthorized();
             }
 
-            await _JobService.CloseAsync(id, userId);
+            await _mediator.Send(new CloseJobCommand { JobId = id, userId = userId });
 
             return NoContent();
         }
