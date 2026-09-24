@@ -1,12 +1,16 @@
-
+using Hangfire;
 using JobApplication.API.Middleware;
 using JobApplication.Application;
+using JobApplication.Application.Features.Jobs.Commands.AutoCloseExpiredJobs;
+using JobApplication.Application.Interfaces;
 using JobApplication.Application.Interfaces.RepositoryInterfaces;
 using JobApplication.Application.Interfaces.ServiceInterfaces;
 using JobApplication.Application.Services;
 using JobApplication.Infrastructure.Identity;
 using JobApplication.Infrastructure.Persistence;
 using JobApplication.Infrastructure.Repositories;
+using JobApplication.Infrastructure.Services;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -39,7 +43,7 @@ namespace JobApplication.API
             builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
             builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
             builder.Services.AddScoped<IApplicationService, ApplicationService>();
-
+            builder.Services.AddScoped<IBackgroundJobScheduler, HangfireBackgroundJobScheduler>();
             builder.Services
             .AddIdentity<ApplicationUser, IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -82,10 +86,31 @@ namespace JobApplication.API
 
             builder.Services.AddScoped<IJWTService, JWTService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddHangfire(config => config
+                        .UseSimpleAssemblyNameTypeSerializer()
+                        .UseRecommendedSerializerSettings()
+                        .UseSqlServerStorage(
+                            builder.Configuration.GetConnectionString("HangfireConnection")));
+
+            builder.Services.AddHangfireServer();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var scheduler = scope.ServiceProvider
+                    .GetRequiredService<IBackgroundJobScheduler>();
+
+                scheduler.AddOrUpdate<IRequestHandler<AutoCloseExpiredJobsCommand>>(
+                    "auto-close-expired-jobs",
+                    handler => handler.Handle(
+                        new AutoCloseExpiredJobsCommand(),
+                        CancellationToken.None),
+                    Cron.Daily());
+            }
+            app.UseHangfireDashboard("/hangfire");
             app.UseMiddleware<GlobalExceptionMiddleware>();
             using (var scope = app.Services.CreateScope())
             {

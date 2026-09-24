@@ -15,5 +15,6 @@
         public Recruiter Recruiter { get; set; } = null!;
 
         public DateTime? ClosedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
     }
 }
