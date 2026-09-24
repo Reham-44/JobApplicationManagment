@@ -34,7 +34,8 @@ namespace JobApplication.Application.Features.Jobs.Commands.CreateJobByRecruiter
                 Title = request.Title,
                 Description = request.Description,
                 IsActive = true,
-                RecruiterId = recruiter.Id
+                RecruiterId = recruiter.Id,
+                CreatedAt = DateTime.UtcNow
             };
 
             await _jobRepository.AddAsync(job);
@@ -46,8 +47,8 @@ namespace JobApplication.Application.Features.Jobs.Commands.CreateJobByRecruiter
                 Title = job.Title,
                 Description = job.Description,
                 IsActive = job.IsActive,
-                ClosedAt = job.ClosedAt
-            };
+                ClosedAt = job.ClosedAt,
+           };
         }
     }
 }
